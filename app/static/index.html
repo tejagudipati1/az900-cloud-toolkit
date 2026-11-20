@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AZ-900 Cloud Toolkit</title>
+  <style>
+    :root { --bg: #f4f7fb; --card: #ffffff; --primary: #0078d4; --dark: #1b2a4a; --border: #dbe3ee; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: #1f2937; }
+    header { background: var(--dark); color: #fff; padding: 1.25rem 2rem; }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    header p { margin: 0.3rem 0 0; opacity: 0.85; font-size: 0.9rem; }
+    main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .card h2 { margin-top: 0; font-size: 1.1rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin: 0.65rem 0 0.25rem; }
+    select, input[type="number"], input[type="text"] { width: 100%; padding: 0.45rem; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .check { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.6rem; font-size: 0.85rem; }
+    button { margin-top: 1rem; width: 100%; padding: 0.6rem; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #005a9e; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 0.85rem; border-radius: 6px; overflow-x: auto; font-size: 0.8rem; margin-top: 1rem; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Microsoft Azure Fundamentals (AZ-900) — Cloud Toolkit</h1>
+    <p>Service Advisor · Pricing Estimator · Azure Policy &amp; Zero Trust Governance Checker</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>1. Service &amp; Storage Advisor</h2>
+      <label>Workload Type</label>
+      <select id="workload_type">
+        <option value="web_api">Web App / REST API</option>
+        <option value="microservices">Microservices Cluster</option>
+        <option value="batch_container">Short-lived Container</option>
+      </select>
+      <label class="check"><input type="checkbox" id="os_control" /> Require full OS control (IaaS)</label>
+      <label class="check"><input type="checkbox" id="event_driven" /> Event-driven / Serverless</label>
+      <label>Blob Access Frequency</label>
+      <select id="access_frequency">
+        <option value="frequent">Frequent (Hot)</option>
+        <option value="monthly">Infrequent / 30+ days (Cool)</option>
+        <option value="quarterly">Rare / 90+ days (Cold)</option>
+        <option value="archival">Long-term Archive / 180+ days</option>
+      </select>
+      <label>Disaster Resilience</label>
+      <select id="resilience">
+        <option value="rack">Single Datacenter (LRS)</option>
+        <option value="zone" selected>Availability Zones (ZRS)</option>
+        <option value="region">Paired Region (GRS)</option>
+        <option value="max">Zones + Paired Region (GZRS)</option>
+      </select>
+      <button onclick="runAdvisor()">Get Recommendation</button>
+      <pre id="out_advisor">Click above to evaluate...</pre>
+    </section>
+
+    <section class="card">
+      <h2>2. Monthly Cost Estimator</h2>
+      <label>Azure Region</label>
+      <select id="c_region">
+        <option value="centralindia">Central India</option>
+        <option value="southindia">South India</option>
+        <option value="eastus">East US</option>
+        <option value="westeurope">West Europe</option>
+      </select>
+      <label>Compute SKU</label>
+      <select id="c_sku">
+        <option value="app_service_b1">App Service Basic B1 ($13.14/mo)</option>
+        <option value="app_service_s1">App Service Standard S1 ($69.35/mo)</option>
+        <option value="vm_b2s">VM B2s ($30.37/mo)</option>
+        <option value="vm_d2s_v3">VM D2s v3 ($70.08/mo)</option>
+        <option value="functions_consumption">Azure Functions Consumption (~$2.50/mo)</option>
+      </select>
+      <label>Instances</label>
+      <input type="number" id="c_instances" value="1" min="1" />
+      <label>Storage (GB)</label>
+      <input type="number" id="c_storage" value="100" min="0" />
+      <label>Redundancy</label>
+      <select id="c_redundancy">
+        <option value="LRS">LRS</option>
+        <option value="ZRS" selected>ZRS</option>
+        <option value="GRS">GRS</option>
+        <option value="GZRS">GZRS</option>
+      </select>
+      <label>Outbound Egress (GB/mo)</label>
+      <input type="number" id="c_egress" value="120" min="0" />
+      <label>Commitment Model</label>
+      <select id="c_commit">
+        <option value="pay_as_you_go">Pay-as-you-go (0%)</option>
+        <option value="1_year_reserved">1-Year Reserved (~30% off)</option>
+        <option value="3_year_reserved">3-Year Reserved (~50% off)</option>
+      </select>
+      <button onclick="runCost()">Estimate Cost</button>
+      <pre id="out_cost">Click above to calculate...</pre>
+    </section>
+
+    <section class="card">
+      <h2>3. Governance &amp; Policy Checker</h2>
+      <label>Target Region</label>
+      <input type="text" id="g_region" value="centralindia" />
+      <label>Environment</label>
+      <select id="g_env">
+        <option value="production">Production</option>
+        <option value="dev">Dev / Test</option>
+      </select>
+      <label>RBAC Role Requested</label>
+      <select id="g_role">
+        <option value="Reader">Reader</option>
+        <option value="Contributor" selected>Contributor</option>
+        <option value="Owner">Owner</option>
+      </select>
+      <label class="check"><input type="checkbox" id="g_lock" checked /> CanNotDelete Resource Lock Enabled</label>
+      <label class="check"><input type="checkbox" id="g_pubdb" /> Public Database Access Enabled</label>
+      <button onclick="runGov()">Validate Compliance</button>
+      <pre id="out_gov">Click above to validate...</pre>
+    </section>
+  </main>
+  <script>
+    async function postJSON(url, body, outId) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      document.getElementById(outId).textContent = JSON.stringify(await res.json(), null, 2);
+    }
+    function runAdvisor() {
+      postJSON("/api/advisor", {
+        workload_type: document.getElementById("workload_type").value,
+        os_control: document.getElementById("os_control").checked,
+        event_driven: document.getElementById("event_driven").checked,
+        access_frequency: document.getElementById("access_frequency").value,
+        resilience: document.getElementById("resilience").value
+      }, "out_advisor");
+    }
+    function runCost() {
+      postJSON("/api/cost", {
+        region: document.getElementById("c_region").value,
+        compute_sku: document.getElementById("c_sku").value,
+        instances: Number(document.getElementById("c_instances").value),
+        storage_gb: Number(document.getElementById("c_storage").value),
+        redundancy: document.getElementById("c_redundancy").value,
+        egress_gb: Number(document.getElementById("c_egress").value),
+        commitment: document.getElementById("c_commit").value
+      }, "out_cost");
+    }
+    function runGov() {
+      postJSON("/api/governance", {
+        region: document.getElementById("g_region").value,
+        environment: document.getElementById("g_env").value,
+        tags: { Environment: document.getElementById("g_env").value, CostCenter: "AIML-01", Owner: "Nalam Srinivasa Moorty" },
+        requested_role: document.getElementById("g_role").value,
+        resource_lock: document.getElementById("g_lock").checked,
+        public_database_access: document.getElementById("g_pubdb").checked
+      }, "out_gov");
+    }
+  </script>
+</body>
+</html>

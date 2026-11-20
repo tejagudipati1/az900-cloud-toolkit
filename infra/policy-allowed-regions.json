@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "displayName": "Allow resources only in India regions",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "description": "Enforces data residency by restricting deployments to Central India and South India.",
+    "policyRule": {
+      "if": {
+        "not": {
+          "field": "location",
+          "in": ["centralindia", "southindia"]
+        }
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}
